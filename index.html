@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Jardim Mágico</title>
+<meta name="theme-color" content="#9fdcff">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icone.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icones/icone-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- Abertura: toque para começar (destrava som e voz) -->
+  <section id="tela-inicio" class="tela ativa">
+    <div class="ceu"><div class="sol"></div><div class="nuvem n1"></div><div class="nuvem n2"></div><div class="nuvem n3"></div></div>
+    <div class="colinas"></div>
+    <div id="inicio-plantas" class="inicio-plantas"></div>
+    <div class="inicio-centro">
+      <h1 class="logo">Jardim <span>Mágico</span></h1>
+      <div id="inicio-nome" class="inicio-nome" hidden>
+        <label for="campo-nome">Para os pais: qual é o nome da criança?</label>
+        <input id="campo-nome" maxlength="24" autocomplete="off" autocapitalize="words" placeholder="Ex.: Ana">
+        <small>Dá pra mudar depois na área dos pais.</small>
+      </div>
+      <button id="bt-comecar" class="bt-play" aria-label="Começar">
+        <svg viewBox="0 0 64 64"><path d="M24 16 L50 32 L24 48 Z" fill="#fff" stroke="#fff" stroke-width="6" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- Jardim -->
+  <section id="tela-jardim" class="tela">
+    <div class="ceu"><div class="sol"></div><div class="nuvem n1"></div><div class="nuvem n2"></div><div class="nuvem n3"></div></div>
+    <div class="colinas"></div>
+    <div class="cerca"></div>
+    <div class="grama"></div>
+    <div id="canteiros" class="canteiros"></div>
+    <div id="borboletas" class="borboletas"></div>
+    <header class="barra">
+      <div class="inventario" id="inv-jardim"></div>
+      <div class="barra-dir">
+        <button id="bt-semente-extra" class="bt-semente-extra" hidden aria-label="Semente de presente"></button>
+        <button id="bt-album" class="bt-redondo" aria-label="Minha coleção">📖</button>
+        <button id="bt-pais" class="bt-pais" aria-label="Área dos pais (segure)"><span>⚙️</span></button>
+      </div>
+    </header>
+    <button id="bt-brincar" class="bt-brincar" aria-label="Brincar de desenhar">
+      <svg viewBox="0 0 100 100">
+        <g transform="rotate(45 50 50)">
+          <rect x="38" y="6" width="24" height="14" rx="5" fill="#ff8fb1"/>
+          <rect x="38" y="18" width="24" height="6" fill="#c9ced8"/>
+          <rect x="38" y="24" width="24" height="46" fill="#ffd23f"/>
+          <rect x="38" y="24" width="8" height="46" fill="#ffe680"/>
+          <rect x="54" y="24" width="8" height="46" fill="#f2b600"/>
+          <path d="M38 70 L62 70 L50 94 Z" fill="#f4cf9c"/>
+          <path d="M45 84 L55 84 L50 94 Z" fill="#45506b"/>
+        </g>
+      </svg>
+    </button>
+  </section>
+
+  <!-- Trilha de fases -->
+  <section id="tela-trilha" class="tela">
+    <header class="barra">
+      <button id="bt-trilha-jardim" class="bt-redondo" aria-label="Voltar ao jardim">🌻</button>
+      <h1 id="trilha-titulo" class="titulo-mundo"></h1>
+      <div class="inventario" id="inv-trilha"></div>
+    </header>
+    <div id="mapa" class="mapa"></div>
+    <nav id="mundos" class="mundos"></nav>
+  </section>
+
+  <!-- Atividade de traçado -->
+  <section id="tela-traco" class="tela">
+    <canvas id="cv-traco"></canvas>
+    <button id="bt-traco-voltar" class="bt-redondo canto-esq" aria-label="Voltar">⬅️</button>
+    <div id="traco-pontos" class="traco-pontos"></div>
+    <div class="traco-dir">
+      <button id="bt-traco-ouvir" class="bt-redondo" aria-label="Ouvir de novo">🔊</button>
+      <button id="bt-traco-refazer" class="bt-redondo" aria-label="Recomeçar">🔄</button>
+    </div>
+  </section>
+
+  <!-- Coleção de plantas -->
+  <section id="tela-album" class="tela">
+    <header class="barra">
+      <button id="bt-album-voltar" class="bt-redondo" aria-label="Voltar">⬅️</button>
+      <h1 class="titulo-mundo">Minha coleção <small id="album-conta"></small></h1>
+      <span class="barra-espaco"></span>
+    </header>
+    <div id="album-grade" class="album-grade"></div>
+  </section>
+
+  <!-- Área dos pais -->
+  <section id="tela-pais" class="tela">
+    <div class="pais-rolagem"><div class="pais-caixa" id="pais-conteudo"></div></div>
+  </section>
+</div>
+
+<div id="modal" class="modal" hidden><div class="modal-caixa" id="modal-caixa"></div></div>
+<div id="aviso" class="aviso" hidden></div>
+<canvas id="confete" aria-hidden="true"></canvas>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><path id="medidor" d="M0 0"/></svg>
+
+<script src="js/util.js"></script>
+<script src="js/plantas.js"></script>
+<script src="js/atividades.js"></script>
+<script src="js/falas.js"></script>
+<script src="js/jogo.js"></script>
+<script src="js/traco.js"></script>
+<script src="js/telas.js"></script>
+<script src="js/pais.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

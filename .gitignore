@@ -1,0 +1,5 @@
+.env
+amostras/
+node_modules/
+.claude/settings.local.json
+.claude/
