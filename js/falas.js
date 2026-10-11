@@ -61,24 +61,30 @@ const Falas = (() => {
     lindo: n => `${n}! Que nome lindo!`
   };
 
-  /* todas as frases que precisam de áudio (o gerador lê isto) */
+  /* todas as frases que precisam de áudio (o gerador lê isto), NA ORDEM DE PRIORIDADE:
+     o modelo de voz só grava ~100 por dia, então vai primeiro o que a criança ouve logo
+     (telas, elogios, plantas comuns e as fases na ordem da trilha) e por último as plantas raras/mágicas. */
   function todas(nome = '') {
     const s = new Set(Object.values(F));
     Object.values(ELOGIOS).flat().forEach(t => s.add(t));
-    for (const e of Plantas.ESPECIES) {
+    const n = (nome || '').trim().split(/\s+/)[0];
+    if (n) Object.values(comNome).forEach(fn => s.add(fn(n)));
+    const especie = e => {
       s.add(plantas.grandona(e.id)); s.add(plantas.cresceu(e.id)); s.add(plantas.nome(e.id));
       e.var.forEach(v => s.add(plantas.escolheu(e.id, v.id)));
-    }
+    };
+    Plantas.ESPECIES.filter(e => e.rar <= 2).forEach(especie);
     const ms = [...Atividades.mundos(''), Atividades.mundoNomeExemplo()];
-    for (const m of ms) {
-      s.add(mundos.nome(m)); s.add(mundos.completo(m));
+    const ordem = ['linhas', 'curvas', 'zigue', 'formas', 'numeros', 'vogais', 'letras', 'nome'];
+    for (const m of [...ms].sort((a, b) => ordem.indexOf(a.id) - ordem.indexOf(b.id))) {
+      s.add(mundos.nome(m));
       const req = ms.find(x => x.id === m.requer);
       if (req) s.add(mundos.trancado(req));
       for (const f of m.fases) { s.add(f.fala); s.add(dica(f)); if (f.final) s.add(f.final.fala); }
+      s.add(mundos.completo(m));
+      if (m.id === 'nome') Atividades.falasDoNome().forEach(t => s.add(t));
     }
-    Atividades.falasDoNome().forEach(t => s.add(t));
-    const n = (nome || '').trim().split(/\s+/)[0];
-    if (n) Object.values(comNome).forEach(fn => s.add(fn(n)));
+    Plantas.ESPECIES.filter(e => e.rar > 2).forEach(especie);
     return [...s];
   }
 
