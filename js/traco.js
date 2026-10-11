@@ -18,10 +18,10 @@ const Traco = (() => {
   let tracos = [], atual = 0, idx = 0;
   let R = 40, pegaR = 60, adiante = 90, larguraTinta = 6;
   let ativo = null, ultimo = null, fora = false;
-  let foraTinta = [], particulas = [];
+  let foraTinta = [], particulas = [], riscos = [], tf = { ox: 0, oy: 0, s: 1 };
   let stats = null, estado = 'parado';
   let demo = null, pulo = null, tremer = 0, pairar = null, fimPos = null;
-  let ultimaAcao = 0, ultimaDemo = 0, ultimoOps = 0, ultimaDica = 0, marco = 1;
+  let ultimaAcao = 0, ultimaDemo = 0, ultimoOps = 0, ultimaDica = 0, ultimoAvisoFora = 0, marco = 1;
   let raf = 0, montado = false, canetaVista = false;
 
   /* ---------- preparação ---------- */
@@ -45,8 +45,8 @@ const Traco = (() => {
     ex = fase; op = opcoes;
     canetaVista = !!op.canetaVista;
     atual = 0; idx = 0; ativo = null; ultimo = null; fora = false; marco = 1;
-    foraTinta = []; particulas = []; demo = null; pulo = null; pairar = null; fimPos = null;
-    stats = { dentro: 0, fora: 0, somaDist: 0, inicio: performance.now(), levantadas: 0 };
+    foraTinta = []; particulas = []; riscos = []; demo = null; pulo = null; pairar = null; fimPos = null;
+    stats = { dentro: 0, fora: 0, somaDist: 0, inicio: performance.now(), levantadas: 0, saidas: 0 };
     estado = 'jogando';
     redimensionar(false);
     tctx.clearRect(0, 0, W, H);
@@ -67,21 +67,25 @@ const Traco = (() => {
     for (const c of [ctx, fctx, tctx]) c.setTransform(dpr, 0, 0, dpr, 0, 0);
     layout();
     if (manter && tracos[atual]) idx = indice(tracos[atual], frac * tracos[atual].total);
+    // a tela mudou de tamanho (barra do Android, giro): redesenha o traço da criança no lugar certo
+    foraTinta = [];
+    for (const r of riscos) tintaSeg({ x: tf.ox + r[0] * tf.s, y: tf.oy + r[1] * tf.s }, { x: tf.ox + r[2] * tf.s, y: tf.oy + r[3] * tf.s });
     desenharFundo();
   }
 
   function layout() {
     const base = Math.min(W, H);
-    R = base * (op.raio || .078);
+    R = base * (op.raio || .026);
     const [vw, vh] = ex.vb;
-    const topo = 70, m = Math.max(R * 1.25, 36);
+    const topo = 70, m = Math.max(R * 1.25, 46);
     const aw = W - 2 * m, ah = H - topo - 2 * m;
     const s = Math.min(aw / vw, ah / vh);
     R = Math.min(R, s * 18); // desenho muito pequeno (nome comprido): a faixa acompanha o tamanho das letras
-    pegaR = Math.max(R * 1.9, 58);
-    adiante = Math.max(R * 2, 56);
-    larguraTinta = Math.max(5, R * .15);
+    pegaR = Math.max(R * 1.9, 52);     // para PEGAR o bichinho a área é generosa (não é isso que se treina)
+    adiante = Math.max(R * 2.2, 40);
+    larguraTinta = Math.max(4.5, R * .2);
     const ox = (W - vw * s) / 2, oy = topo + m + (ah - vh * s) / 2;
+    tf = { ox, oy, s };
     tracos = ex.tracos.map((t, i) => amostrar(t, s, ox, oy, (ex.cores && ex.cores[i]) || CORES[i % CORES.length]));
   }
 
@@ -149,7 +153,7 @@ const Traco = (() => {
     const a = 0, b = Math.min(tr.n - 1, 6);
     const ang = Math.atan2(tr.ys[b] - tr.ys[a], tr.xs[b] - tr.xs[a]);
     // fica de lado em relação ao começo do traço, para não ficar embaixo do personagem
-    const x = tr.xs[0] + Math.cos(ang - Math.PI * .75) * R * 1.35, y = tr.ys[0] + Math.sin(ang - Math.PI * .75) * R * 1.35;
+    const x = tr.xs[0] + Math.cos(ang - Math.PI * .75) * Math.max(R * 1.35, 42), y = tr.ys[0] + Math.sin(ang - Math.PI * .75) * Math.max(R * 1.35, 42);
     const r = Math.max(13, R * .36);
     c.save();
     c.globalAlpha = destaque ? 1 : .55;
@@ -219,13 +223,24 @@ const Traco = (() => {
       y = pulo.de.y + (pulo.para.y - pulo.de.y) * e - Math.sin(k * Math.PI) * R * 2.4;
       if (k >= 1) { pulo = null; agendarDemo(200); }
     } else { x = tr.xs[idx]; y = tr.ys[idx]; }
+    // desenhando direitinho: o bichinho vai ao lado da linha (por cima), sem tapar os pontinhos que vêm a seguir
+    if (ativo !== null && !fora && !pulo) {
+      const a = Math.max(0, idx - 5), b = Math.min(tr.n - 1, idx + 5);
+      let nx = -(tr.ys[b] - tr.ys[a]), ny = tr.xs[b] - tr.xs[a];
+      const n = Math.hypot(nx, ny) || 1; nx /= n; ny /= n;
+      if (ny > 0) { nx = -nx; ny = -ny; }
+      emoji(ex.ator, x + nx * 38, y + ny * 38, 36);
+      return;
+    }
+    // esperando, ou saiu da linha: o bichinho fica parado no ponto exato onde tem que continuar
     const esperando = ativo === null && !pulo;
-    const bob = esperando ? Math.sin(agora / 240) * R * .1 : 0;
+    const bob = esperando ? Math.sin(agora / 240) * 4 : 0;
     const sx = tremer > agora ? Math.sin(agora / 22) * 6 : 0;
+    const raio = Math.max(26, R * .84) * (esperando || fora ? 1 + .1 * Math.sin(agora / 170) : 1);
     ctx.save();
-    ctx.beginPath(); ctx.arc(x, y, R * .84 * (esperando ? 1 + .08 * Math.sin(agora / 190) : 1.06), 0, 7);
+    ctx.beginPath(); ctx.arc(x, y, raio, 0, 7);
     ctx.fillStyle = 'rgba(255,255,255,.9)'; ctx.fill();
-    ctx.lineWidth = Math.max(3.5, R * .11); ctx.strokeStyle = fora ? '#ff9f43' : (tr ? tr.cor : '#5cc46a'); ctx.stroke();
+    ctx.lineWidth = Math.max(3.5, R * .14); ctx.strokeStyle = fora ? '#ff8a3d' : (tr ? tr.cor : '#5cc46a'); ctx.stroke();
     ctx.restore();
     emoji(ex.ator, x + sx, y + bob, Math.max(44, R * 1.42));
   }
@@ -272,9 +287,9 @@ const Traco = (() => {
     if (estado === 'jogando' && tr) linha(ctx, tr, 0, idx, tr.cor, R * 1.6 * .9, .9);
     ctx.drawImage(tinta, 0, 0, W, H);
     if (foraTinta.length) {
-      foraTinta = foraTinta.filter(s => agora - s.t < 1400);
+      foraTinta = foraTinta.filter(s => agora - s.t < 2200);
       ctx.save(); ctx.lineCap = 'round'; ctx.lineWidth = larguraTinta; ctx.strokeStyle = '#ff6b6b';
-      for (const s of foraTinta) { ctx.globalAlpha = .85 * (1 - (agora - s.t) / 1400); ctx.beginPath(); ctx.moveTo(s.a.x, s.a.y); ctx.lineTo(s.b.x, s.b.y); ctx.stroke(); }
+      for (const s of foraTinta) { ctx.globalAlpha = .85 * (1 - (agora - s.t) / 2200); ctx.beginPath(); ctx.moveTo(s.a.x, s.a.y); ctx.lineTo(s.b.x, s.b.y); ctx.stroke(); }
       ctx.restore();
     }
     if (estado === 'jogando' && tr) {
@@ -356,9 +371,11 @@ const Traco = (() => {
   function processar(x, y) {
     const tr = tracos[atual];
     const s0 = tr.cum[idx];
+    // saiu da linha? só volta a valer quando retornar ao ponto exato onde parou (rabiscar cruzando a linha não avança)
+    const frente = fora ? R * .6 : adiante;
     let j0 = idx, j1 = idx;
     while (j0 > 0 && s0 - tr.cum[j0 - 1] <= R) j0--;
-    while (j1 < tr.n - 1 && tr.cum[j1 + 1] - s0 <= adiante) j1++;
+    while (j1 < tr.n - 1 && tr.cum[j1 + 1] - s0 <= frente) j1++;
     let melhor = Infinity, bj = idx;
     for (let j = j0; j <= j1; j++) {
       const dx = tr.xs[j] - x, dy = tr.ys[j] - y, dd = dx * dx + dy * dy;
@@ -369,8 +386,8 @@ const Traco = (() => {
     const comp = Math.hypot(b.x - a.x, b.y - a.y);
     if (dist <= R) {
       stats.dentro += comp; stats.somaDist += dist * comp;
-      tctx.strokeStyle = '#2f3e5c'; tctx.lineWidth = larguraTinta; tctx.lineCap = 'round';
-      tctx.beginPath(); tctx.moveTo(a.x, a.y); tctx.lineTo(b.x + .01, b.y); tctx.stroke();
+      tintaSeg(a, b);
+      riscos.push([(a.x - tf.ox) / tf.s, (a.y - tf.oy) / tf.s, (b.x - tf.ox) / tf.s, (b.y - tf.oy) / tf.s]);
       fora = false;
       if (bj > idx) avancar(bj);
     } else {
@@ -378,13 +395,20 @@ const Traco = (() => {
       if (comp > 0) foraTinta.push({ a, b, t: performance.now() });
       if (!fora) {
         fora = true;
+        stats.saidas++;
         const agora = performance.now();
         tremer = agora + 350;
         if (agora - ultimoOps > 1200) { ultimoOps = agora; Som.ops(); }
+        if (agora - ultimoAvisoFora > 7000) { ultimoAvisoFora = agora; op.aoEvento?.('fora'); }
       }
     }
     ultimo = b;
     if (tr.total - tr.cum[idx] <= Math.max(6, R * .3)) concluirTraco();
+  }
+
+  function tintaSeg(a, b) {
+    tctx.strokeStyle = '#2f3e5c'; tctx.lineWidth = larguraTinta; tctx.lineCap = 'round';
+    tctx.beginPath(); tctx.moveTo(a.x, a.y); tctx.lineTo(b.x + .01, b.y); tctx.stroke();
   }
 
   function avancar(j) {
@@ -426,10 +450,12 @@ const Traco = (() => {
   function resultado() {
     const tot = stats.dentro + stats.fora || 1;
     const foraFrac = stats.fora / tot;
-    const prec = stats.dentro ? stats.somaDist / stats.dentro / R : 1; // 0 = no centro, 1 = na borda
-    const nota = 1 - foraFrac * 2 - Math.max(0, prec - .4) * 1.1;
-    const estrelas = nota >= .78 ? 3 : nota >= .5 ? 2 : 1;
-    return { estrelas, nota: +nota.toFixed(3), foraFrac: +foraFrac.toFixed(3), prec: +prec.toFixed(3), tempo: Math.round((performance.now() - stats.inicio) / 100) / 10 };
+    const prec = stats.dentro ? stats.somaDist / stats.dentro / R : 1; // 0 = em cima da linha, 1 = na borda da faixa
+    // exigente: sair da linha pesa muito, e ficar "quase na borda" também tira ponto.
+    // 0 estrela = não valeu (faz de novo, sem prêmio)
+    const nota = 1 - foraFrac * 2.5 - Math.max(0, prec - .35) * 1.3;
+    const estrelas = nota >= .8 ? 3 : nota >= .62 ? 2 : nota >= .42 ? 1 : 0;
+    return { estrelas, nota: +nota.toFixed(3), foraFrac: +foraFrac.toFixed(3), prec: +prec.toFixed(3), saidas: stats.saidas, tempo: Math.round((performance.now() - stats.inicio) / 100) / 10 };
   }
 
   function dica() {
@@ -459,7 +485,7 @@ const Traco = (() => {
     }
   }
 
-  return { montar, iniciar, parar, reiniciar, simular, info: () => {
+  return { montar, iniciar, parar, reiniciar, simular, depurar: () => ({ tr: tracos[atual], idx, fora, R, atual, pulo: !!pulo }), info: () => {
     const tr = tracos[atual];
     return { estado, atual, total: tracos.length, R, progresso: tr ? +(tr.cum[idx] / tr.total).toFixed(3) : 1, ator: tr ? { x: tr.xs[idx], y: tr.ys[idx] } : null };
   } };

@@ -5,7 +5,7 @@ const Jogo = (() => {
   const PONTOS = { agua: 10, adubo: 25 };          // quanto cada item faz a planta crescer
   const PRECISA = { 1: 150, 2: 240, 3: 330, 4: 450 }; // pontos até a planta ficar adulta, por raridade
   const RITMO = { devagar: 1.5, normal: 1, rapido: .65 }; // ajuste dos pais: quanto a planta demora para crescer
-  const RAIO = [.1, .078, .06, .045];               // largura do caminho por dificuldade (fração do lado menor da tela)
+  const RAIO = [.037, .026, .019, .014];            // tolerância para cada lado da linha (fração do lado menor da tela): ~5, 3,5, 2,5 e 2 mm num tablet de 10"
 
   const padrao = () => ({
     versao: 1, nome: '', agua: 0, adubo: 0, plantas: [], proxId: 1, colecao: {}, fases: {}, mundosOk: {},
@@ -22,6 +22,7 @@ const Jogo = (() => {
     e = Object.assign(padrao(), d || {});
     e.ajustes = Object.assign(padrao().ajustes, e.ajustes || {});
     e.tutorial = Object.assign(padrao().tutorial, e.tutorial || {});
+    e.auto = Math.min(1, e.auto || 1);
     virarDia();
     return e;
   }
@@ -84,8 +85,9 @@ const Jogo = (() => {
     h.atividades++; h.estrelas += res.estrelas;
 
     // o jogo se ajusta sozinho: caminho afina quando vai muito bem, alarga quando está difícil
-    if (res.estrelas === 3) e.auto = Math.max(.82, e.auto * .97);
-    else if (res.estrelas === 1) e.auto = Math.min(1.3, e.auto * 1.07);
+    // fica um pouco mais exigente quando ela acerta muito; nunca fica mais fácil que o nível escolhido pelos pais
+    if (res.estrelas === 3) e.auto = Math.max(.75, e.auto * .97);
+    else if (res.estrelas === 1) e.auto = Math.min(1, e.auto * 1.03);
 
     let mundoNovo = null;
     const loc = localizar(fase.id);

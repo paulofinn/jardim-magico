@@ -13,10 +13,12 @@ instala como app no tablet, igual ao Heróis da Rotina.
 2. **Trilha** → toca na fase que está pulando. A voz explica o que fazer.
 3. **Traçado** → encosta a caneta no bichinho e leva ele pelo caminho até o alvo
    (a abelha até a flor, a gota até a plantinha...). Uma luz mostra o caminho antes de começar.
-   - Só avança quem fica dentro da faixa branca e segue o caminho (não dá para cortar caminho).
-   - Saiu do caminho? O traço fica vermelho e some sozinho; é só voltar ao bichinho.
+   - **Precisão:** só avança quem fica em cima da linha pontilhada, com tolerância de uns 3,5 mm para cada lado
+     (nível Médio). Saiu disso, o bichinho para, o traço fica vermelho e a voz pede "Volte para a linha pontilhada!".
+   - Para continuar, ela tem que **voltar ao ponto exato onde parou**: rabiscar cruzando a linha não avança.
    - A cada pedaço completado toca uma nota musical, e as notas vão subindo.
-4. **Recompensa** → 1 a 3 estrelas. Mais estrelas = mais água e adubo.
+4. **Recompensa** → 1 a 3 estrelas, conforme ficou em cima da linha. Mais estrelas = mais água e adubo.
+   Traço feito de qualquer jeito **não vale**: aparece "Quase!", não ganha nada e refaz.
 5. **Jardim** → toca na planta → gota (regar) ou saquinho (adubar). Ela cresce na hora.
 6. Planta adulta → aparece uma **semente** brilhando → toca → escolhe entre 3 pacotinhos.
 
@@ -47,8 +49,9 @@ Completar um mundo dá uma **semente de presente**. Letras e números seguem a o
 - **O jardim não tem fim**: cada planta adulta dá uma semente e nasce outra; completar um mundo dá uma semente
   extra. Depois de juntar as 42, os pacotinhos continuam vindo (o jardim só cresce, e rola para o lado).
   Ao abrir o jardim, ele já mostra a planta que precisa de água.
-- O caminho **se ajusta sozinho**: fica um pouco mais fino quando ela tira 3 estrelas e mais largo
-  quando tira 1 estrela.
+- **Largura do caminho** (área dos pais): Fácil (~5 mm para cada lado), Médio (~3,5 mm, padrão), Difícil (~2,5 mm)
+  e Desafio (~2 mm). O jogo fica **mais exigente sozinho** quando ela tira 3 estrelas (até 25% mais fino) e nunca
+  fica mais fácil que o nível escolhido.
 
 ## Voz
 

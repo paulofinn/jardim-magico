@@ -324,7 +324,26 @@ const Trilha = (() => {
 
 /* ================= RECOMPENSA ================= */
 const Recompensa = (() => {
+  /* traço feito de qualquer jeito: não vale, não ganha nada, tenta de novo */
+  function naoValeu(fase) {
+    Modal.abrir(`<div class="nao-valeu"><div class="nao-valeu-ator">${fase.ator}</div><h2>Quase!</h2>
+      <p>Tente de novo, bem em cima da linha pontilhada.</p>
+      <div class="botoes-fim">
+        <button class="bt-fim voltar" data-a="trilha" aria-label="Voltar para a trilha">⬅️</button>
+        <button class="bt-fim repetir" data-a="repetir" aria-label="Tentar de novo">🔄</button>
+      </div></div>`, { fixo: true, classe: 'modal-recompensa' });
+    Som.nao();
+    setTimeout(() => Voz.falar(Falas.tenteDeNovo), 300);
+    $$('#modal .bt-fim').forEach(b => b.addEventListener('click', () => {
+      Som.pop();
+      Modal.fechar();
+      if (b.dataset.a === 'repetir') App.jogar(fase);
+      else App.ir('trilha', { mundo: Jogo.localizar(fase.id)?.mundo.id });
+    }));
+  }
+
   async function mostrar(fase, res) {
+    if (!res.estrelas) return naoValeu(fase);
     const rec = Jogo.concluir(fase, res);
     const fim = fase.final;
     const html = `<div class="estrelas-grandes">${[1, 2, 3].map(k => `<span class="estrela-slot ${k <= res.estrelas ? 'ganha' : ''}" style="--d:${k * .35}s">${Icone.estrela(k <= res.estrelas)}</span>`).join('')}</div>

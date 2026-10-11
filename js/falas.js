@@ -5,6 +5,8 @@
 
 const Falas = (() => {
   const F = {
+    volteLinha: 'Opa! Volte para a linha pontilhada!',
+    tenteDeNovo: 'Quase! Vamos tentar de novo, bem em cima da linha pontilhada?',
     regarDica: 'Toque na gotinha para regar!',
     semAgua: 'Acabou a água! Vamos desenhar para ganhar mais?',
     semAdubo: 'Acabou o adubo! Vamos desenhar para ganhar mais?',

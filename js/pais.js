@@ -1,7 +1,7 @@
 /* pais.js — área dos pais: nome, dificuldade, caneta, tempo por dia, progresso e backup. */
 
 const Pais = (() => {
-  const DIFS = ['Bem fácil', 'Fácil', 'Médio', 'Desafio'];
+  const DIFS = ['Fácil (~5 mm)', 'Médio (~3,5 mm)', 'Difícil (~2,5 mm)', 'Desafio (~2 mm)'];
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
   function ultimosDias(n = 7) {
@@ -37,7 +37,8 @@ const Pais = (() => {
       <section class="pais-sec">
         <h2>Largura do caminho</h2>
         <div class="seg" id="p-dif">${DIFS.map((d, i) => `<button data-v="${i}" class="${a.dificuldade === i ? 'on' : ''}">${d}</button>`).join('')}</div>
-        <p class="dica">O jogo também se ajusta sozinho: afina quando ela acerta muito e alarga quando está difícil. Ajuste automático agora: <b>${Math.round(e.auto * 100)}%</b> <button class="link" id="p-auto">voltar a 100%</button></p>
+        <p class="dica">Quanto ela pode se afastar da linha pontilhada para cada lado. Fora disso o bichinho para, o traço fica vermelho e ela precisa voltar ao ponto onde parou. Traço feito de qualquer jeito não vale: ela refaz, sem prêmio.
+          O jogo também fica mais exigente sozinho quando ela tira 3 estrelas seguidas (nunca mais fácil que o nível escolhido). Exigência extra agora: <b>${Math.round((1 - e.auto) * 100)}%</b> mais fino <button class="link" id="p-auto">zerar</button></p>
       </section>
 
       <section class="pais-sec">

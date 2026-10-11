@@ -281,6 +281,11 @@ svg { display: block; }
 .bt-fim.repetir { background: #ffc93c; box-shadow: 0 7px 0 #d99b00; }
 .bt-fim.proximo { background: #3fa9f5; box-shadow: 0 7px 0 #1f7cc2; width: 132px; }
 .bt-fim:active { transform: translateY(5px); box-shadow: none; }
+.bt-fim.voltar { background: #c9d3df; box-shadow: 0 7px 0 #9fadbf; }
+.nao-valeu-ator { font-size: 80px; line-height: 1; animation: nega .5s ease 2; }
+.nao-valeu h2 { margin: 6px 0 0; font-size: 44px; color: #ff8a3d; }
+.nao-valeu p { margin: 4px 0 0; font-size: 22px; }
+.nao-valeu .bt-fim.repetir { width: 150px; }
 
 .descanso .lua { font-size: 90px; }
 .descanso h2 { margin: 0; font-size: 40px; }

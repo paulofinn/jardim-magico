@@ -36,6 +36,7 @@ const App = (() => {
       aoVerCaneta: () => Jogo.marcarCaneta(),
       aoEvento: (tipo, x) => {
         if (tipo === 'dica') Voz.falar(Falas.dica(fase));
+        else if (tipo === 'fora') Voz.falar(Falas.volteLinha);
         else if (tipo === 'traco') { pontos(fase, x); if (x === 1 && fase.tracos.length > 1) Voz.falar(Falas.proximo); }
         else if (tipo === 'fim') pontos(fase, fase.tracos.length);
       },
